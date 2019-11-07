@@ -1,6 +1,31 @@
 # SeismoPi
-A methodology for seismic damage and renewal cost analysis
+**Seismic Damage Assessment Tools for Buried Pipelines**
+
+Overview
+--------
+**SeismoPi** is a Python package that allows to develop scenario-based earthquake loss estimation for buried pipelines. This tool gives an interactive probable damage scenario for distributed buried pipeline infrastructures.
 
 
-SeismoPi is a Python package that allows to develop scenario-based earthquake loss estimation of urban areas.
-this tool is developed by Ram Krishna Mazumder, Department of Civil Engineering, Case Western Reserve University, Cleveland, Ohio 44118, USA. Email: rxm562@case.edu
+Dependency
+----------
+* networkx
+* dolium
+* scipy
+* matplotlib
+* numpy
+* pandas
+* fiona
+* ipyleaflet
+* pyproj
+* os
+
+
+Version Reslease
+-----------------
+* v 0.0.1 : August 3, 2019
+
+
+
+License
+-----------------
+The project is licensed under the MIT license.
