@@ -3,7 +3,7 @@
 
 Overview
 --------
-**SeismoPi** is a Python package that allows to develop scenario-based earthquake damage and renewal cost estimation for buried pipeline networks. This tool gives an interactive damage scenario for distributed buried water infrastructures.
+**SeismoPi** is a Python package that allows developing scenario-based earthquake damage and renewal cost estimation for buried pipeline networks. This tool gives an interactive damage scenario for distributed buried water infrastructures.
 
 
 Dependency
