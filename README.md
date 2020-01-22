@@ -25,6 +25,10 @@ Version Reslease
 * v 0.0.1 : August 3, 2019
 
 
+Authors
+-----------------
+* This tool is developed by Dr. Yue Li research group, the Department of Civil Engineering, Case Western Reserve University
+
 
 License
 -----------------
