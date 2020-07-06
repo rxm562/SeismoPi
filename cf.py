@@ -1,58 +1,52 @@
-"""
-This file to for correction factor
-"""
+# Intensity Calculator
 
+# Import Libraries
 import numpy as np
-import pandas as pd
 from scipy.spatial import distance
-import matplotlib.pyplot as plt
-import networkx as nx
 
-def correction_factor(pipe_characteristics, M_type=None, soil_type=None, age=None):
+#Intensity Calculation Model
+class Intensity (object):
+    def __init__(self, ex, ey, M):
+        self.ex = ex  # Long of Epicenter
+        self.ey = ey  # Lat of Epicenter
+        self.M=M      # EQ Magnitude
+    def intensity_node(data,ex,ey,M):
+        d = []        # Distance from Epicenter to node
+        PGA = []      # Peak Ground Acceleration
+        PGV = []      # Peak Ground Velocity
+        pos = {}
+        for index, row in data.iterrows():
+            x = row['x'] # long of site
+            y = row['y'] # lat of site
+            D = distance.euclidean((ex,ey), (x,y))/1000                      #Distance from Epicenter to node
+            A = (403.8*np.power(10, 0.265*M)*np.power(D+30, -1.218))/981     # Attenuation Model for PGA (g)
+            V = (np.power(10, -0.848 + 0.775*M + -1.834*np.log10(D+17)))/100  # Attenuation Model for PGV (m/s)
+            d.append(D)
+            PGA.append(A)
+            PGV.append(V)
+            pos[int(row['id'])]=(x,y)
+        d = np.array(d)
+        PGA = np.array(PGA)
+        PGV = np.array(PGV)
+        return d, PGA, PGV, pos
 
-    # Make sure the values are strings
-    pipe_characteristics = pd.DataFrame(data = pipe_characteristics.values, columns =pipe_characteristics.columns, index = pipe_characteristics.index.astype('str'))
-                  
-    if M_type is None:
-        k3_weight = {'AC': 1.0, 'CI': 1.0, 'DI': 0.5, 'PVC': 0.5, 'STL': 0.7, 'RCCP': 0.2}
+    def intensity_link(link,node,ex,ey,M):
+        PGA = []
+        PGV = []
+        for index, row in link.iterrows():
+            start_node = row['start_node'] # Start node for link
+            end_node = row['end_node']     # End node for link
+            start_x, start_y = node.loc[node['id']==start_node, ['x','y']].values[0]
+            end_x, end_y = node.loc[node['id']==end_node, ['x','y']].values[0]
+            D_start = distance.euclidean((ex,ey), (start_x,start_y))/1000
+            A_start = (403.8*np.power(10, 0.265*M)*np.power(D_start+30, -1.218))/980
+            V_start = (np.power(10, -0.848 + 0.775*M + -1.834*np.log10(D_start+17)))/100
+            D_end = distance.euclidean((ex,ey), (end_x,end_y))/1000
+            A_end = 403.8*np.power(10, 0.265*M)*np.power(D_end+30, -1.218)/980
+            V_end = (np.power(10, -0.848 + 0.775*M + -1.834*np.log10(D_end+17)))/100
+            PGA.append((A_start+A_end)/2)
+            PGV.append((V_start+V_end)/2)
+        return PGA, PGV
 
-    if M_type is None:
-        k2_weight = {'AC': 1.0, 'CI': 1.0, 'DI': 1.5, 'PVC': 1.0, 'STL': 1.0, 'RCCP': 1.0}
-        
-    def find_corrosion(arrlike):
-        age = arrlike['age']
-        soil_type = arrlike['soil_type']
-        M_type = arrlike['M_type']
-        if M_type == 'CI':
-            if soil_type == 'H':
-                if age < 1920:
-                    corrosion_rate = 3.0
-                elif age<1960:
-                    corrosion_rate = -0.05*age+99
-                else:
-                    corrosion_rate = 1.0
-            elif soil_type == 'M':
-                if age < 1920:
-                    corrosion_rate = 2.0
-                elif age<1960:
-                    corrosion_rate = -0.025*age+50
-                else:
-                    corrosion_rate = 1.0
-            elif soil_type == 'L':
-                corrosion_rate = 1.0
-            else:
-                print('Soil Type Index Wrong')
 
-        elif M_type == 'DI':
-            corrosion_rate = 1.5
-        else:
-            corrosion_rate = 1.0
-            
-        return corrosion_rate
-        
-    C0 = pipe_characteristics['M_type'].map(k3_weight)
-    C1 = pipe_characteristics['M_type'].map(k2_weight)
-    C2 = pipe_characteristics.apply(find_corrosion,axis = 1)
-    C = C0*C2
-
-    return C
+# Attenuation Equations provided by Kawashima et al. (1984) and Yu and Jin (2008) are used for intensity estimation at site
